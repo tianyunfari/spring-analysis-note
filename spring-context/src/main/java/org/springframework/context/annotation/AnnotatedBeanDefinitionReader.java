@@ -248,8 +248,9 @@ public class AnnotatedBeanDefinitionReader {
 	private <T> void doRegisterBean(Class<T> annotatedClass, @Nullable String name,
 			@Nullable Class<? extends Annotation>[] qualifiers, @Nullable Supplier<T> supplier,
 			@Nullable BeanDefinitionCustomizer[] customizers) {
-
+		// 解析传入的配置类，实际上这个方法既可以解析配置类，也可以解析 Spring bean 对象
 		AnnotatedGenericBeanDefinition abd = new AnnotatedGenericBeanDefinition(annotatedClass);
+		// 判断是否需要跳过，判断依据是此类上有没有 @Conditional 注解
 		if (this.conditionEvaluator.shouldSkip(abd.getMetadata())) {
 			return;
 		}
@@ -273,6 +274,7 @@ public class AnnotatedBeanDefinitionReader {
 				}
 			}
 		}
+		// 封装成一个 BeanDefinitionHolder
 		if (customizers != null) {
 			for (BeanDefinitionCustomizer customizer : customizers) {
 				customizer.customize(abd);
@@ -280,7 +282,9 @@ public class AnnotatedBeanDefinitionReader {
 		}
 
 		BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(abd, beanName);
+		// 处理 scopedProxyMode
 		definitionHolder = AnnotationConfigUtils.applyScopedProxyMode(scopeMetadata, definitionHolder, this.registry);
+		// 把 BeanDefinitionHolder 注册到 registry
 		BeanDefinitionReaderUtils.registerBeanDefinition(definitionHolder, this.registry);
 	}
 

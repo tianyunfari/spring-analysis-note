@@ -62,7 +62,17 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	 * through {@link #register} calls and then manually {@linkplain #refresh refreshed}.
 	 */
 	public AnnotationConfigApplicationContext() {
+		/* 在实例化AnnotatedBeanDefinitionReader的过程中的registerAnnotationConfigProcessors,
+		向容器中添加2个beanFactory后置处理器：
+		【ConfigurationClassPostProcessor】
+		【EventListenerMethodProcessor】
+		2个bean后置处理器
+		【AutowireAnnotationBeanPostProcessor】
+		【CommonAnnotationBeanPostProcessor】
+		向容器中添加普通组件【DefaultEventListenerFactory】
+		 */
 		this.reader = new AnnotatedBeanDefinitionReader(this);
+		// 实例化一个ClassPathBeanDefinitionScanner扫包器
 		this.scanner = new ClassPathBeanDefinitionScanner(this);
 	}
 
@@ -83,8 +93,14 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	 * e.g. {@link Configuration @Configuration} classes
 	 */
 	public AnnotationConfigApplicationContext(Class<?>... annotatedClasses) {
+		// 基于注解容器入口
 		this();
+		// 其中doRegisterBean将配置类SpringConfig注册到容器中，注意这里只是注册BeanDefinition信息
+		// 并非实例化
 		register(annotatedClasses);
+		// 容器刷新
+		// Spring 中的每一个容器都会调用 refresh 方法进行刷新，无论是 Spring 的父子容器，
+		// 还是 Spring Cloud Feign 中的 feign 隔离容器，每一个容器都会调用这个方法完成初始化。
 		refresh();
 	}
 

@@ -538,22 +538,23 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				registerBeanPostProcessors(beanFactory);
 
 				// Initialize message source for this context.
-				// 初始化消息资源
+				// 初始化消息资源，做国际化功能；消息绑定，消息解析）
 				initMessageSource();
 
 				// Initialize event multicaster for this context.
-				// 初始化事件传播器
+				// 初始化事件传播器，在注册监听器时会用到
 				initApplicationEventMulticaster();
 
 				// Initialize other special beans in specific context subclasses.
-				// 让子类实现
+				// 让子类实现，子类重写这个方法，在容器刷新的时候可以自定义逻辑，web 场景下会使用
 				onRefresh();
 
 				// Check for listener beans and register them.
-				// 检查并注册监听器
+				// 检查并注册监听器，派发之前步骤产生的一些事件（可能没有）
 				registerListeners();
 
 				// Instantiate all remaining (non-lazy-init) singletons.
+				// 在上面的步骤中，Spring 的大多数组件都已经初始化完毕了
 				// 注释 4.2 实例化非懒加载的单例
 				finishBeanFactoryInitialization(beanFactory);
 
@@ -662,6 +663,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		// Configure the bean factory with context callbacks.
 		// 这一步中，给 beanFactory 注册了个 beanPostProcessor，后处理器的类型是 ApplicationContextAwareProcessor
 		beanFactory.addBeanPostProcessor(new ApplicationContextAwareProcessor(this));
+		// 设置忽略自动装配的接口，即不能通过注解自动注入
 		beanFactory.ignoreDependencyInterface(EnvironmentAware.class);
 		beanFactory.ignoreDependencyInterface(EmbeddedValueResolverAware.class);
 		beanFactory.ignoreDependencyInterface(ResourceLoaderAware.class);
@@ -671,6 +673,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 		// BeanFactory interface not registered as resolvable type in a plain factory.
 		// MessageSource registered (and found for autowiring) as a bean.
+		// 注册可以解析的自动装配类，即可以在任意组件中通过注解自动注入
 		beanFactory.registerResolvableDependency(BeanFactory.class, beanFactory);
 		beanFactory.registerResolvableDependency(ResourceLoader.class, this);
 		beanFactory.registerResolvableDependency(ApplicationEventPublisher.class, this);
@@ -894,6 +897,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		beanFactory.freezeConfiguration();
 
 		// Instantiate all remaining (non-lazy-init) singletons.
+		// 实例化剩余的所有单例非懒加载的bean
 		beanFactory.preInstantiateSingletons();
 	}
 
